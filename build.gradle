@@ -1,0 +1,47 @@
+apply plugin: 'scala'
+apply plugin: 'eclipse'
+
+version = '0.0.1'
+
+ext.launcherMain = 'org.kneelawk.javacvfacerecognitiontest.JavaCVFaceRecognitionTestLauncher'
+
+sourceSets { launcher }
+
+repositories { jcenter() }
+
+configurations {
+	all*.exclude group: 'org.bytedeco', module: 'java-presets'
+}
+
+dependencies {
+	compile 'org.scala-lang:scala-library:2.11.8'
+	compile 'org.bytedeco:javacv:1.2'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:linux-armhf'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:linux-ppc64le'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:linux-x86'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:linux-x86_64'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:macosx-x86_64'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:windows-x86'
+	compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2:windows-x86_64'
+	compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2:linux-x86'
+	compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2:linux-x86_64'
+	compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2:macosx-x86_64'
+	compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2:windows-x86'
+	compile 'org.bytedeco.javacpp-presets:ffmpeg:3.1.2-1.2:windows-x86_64'
+}
+
+// builds the launch jar
+task launcherJar(type: Jar, dependsOn: [jar, launcherClasses]) {
+	manifest { attributes 'Main-Class': launcherMain }
+	baseName "${project.name}-all"
+	from(configurations.compile) { into 'libs' }
+	from('dependencies/natives') { into 'natives' }
+	from(jar.outputs.files) { into 'app' }
+	from(sourceSets.launcher.output)
+	from('LICENSE')
+
+	group 'Build'
+	description 'Creates a jar with all dependencies included.'
+}
+
+assemble.dependsOn launcherJar
